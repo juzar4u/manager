@@ -1351,6 +1351,66 @@ namespace ManagerIO.DataModels
 
 
 
+
+
+		[Column] public string Code { get; set; }
+
+
+
+
+
+		[Column] public decimal? CreditLimit { get; set; }
+
+
+
+	}
+
+    
+
+	[TableName("dbo.sysdiagrams")]
+
+
+
+	[PrimaryKey("diagram_id")]
+
+
+
+
+	[ExplicitColumns]
+
+    public partial class sysdiagram : ManagerIORepository.Record<sysdiagram>  
+    {
+
+
+
+		[Column] public string name { get; set; }
+
+
+
+
+
+		[Column] public int principal_id { get; set; }
+
+
+
+
+
+		[Column] public int diagram_id { get; set; }
+
+
+
+
+
+		[Column] public int? version { get; set; }
+
+
+
+
+
+		[Column] public byte[] definition { get; set; }
+
+
+
 	}
 
     

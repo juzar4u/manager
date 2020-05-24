@@ -290,7 +290,7 @@ namespace ManagerIO.DataServices.Services
                     }
                     else if (ObjectID == (int)ObjectEnum.Supplier)
                     {
-                        sql.Append("insert into Suppliers values(@0,@1,@2,@3,@4,@5,@6)", i.ApiKey, i.Name, i.Email,i.Address, i.BusinessID, i.BusinessKey, i.IsActive);
+                        sql.Append("insert into Suppliers values(@0,@1,@2,@3,@4,@5,@6,@7,@8)", i.ApiKey, i.Name, i.Email, i.Address, i.BusinessID, i.BusinessKey, i.IsActive, i.Code, i.CreditLimit);
                     }
                 }
 

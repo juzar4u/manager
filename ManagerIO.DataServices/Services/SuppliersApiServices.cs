@@ -1,5 +1,5 @@
 ﻿using ManagerIO.DataModels;
-using ManagerIO.DataModels.Models.CustomEntities.ApiModels;
+using ManagerIO.DataModels.Models.CustomEntities.SupplierApiModelcs;
 using ManagerIO.DataModels.Models.Enumerations;
 using System;
 using System.Collections.Generic;
@@ -9,66 +9,65 @@ using System.Threading.Tasks;
 
 namespace ManagerIO.DataServices.Services
 {
-    public class CustomersApiServices
+    public class SuppliersApiServices
     {
         #region Define as Singleton
-        private static CustomersApiServices _Instance;
-        public static CustomersApiServices Instance
+        private static SuppliersApiServices _Instance;
+        public static SuppliersApiServices Instance
         {
             get
             {
                 if (_Instance == null)
                 {
-                    _Instance = new CustomersApiServices();
+                    _Instance = new SuppliersApiServices();
                 }
 
                 return (_Instance);
             }
         }
         #endregion
-
-        public List<InvoiceCustomerModel> getCustomerInvoices(decimal businessID)
+        public List<InvoiceSupplierModel> getSupplierInvoices(decimal businessID)
         {
-            List<InvoiceCustomerModel> customerInvoices = new List<InvoiceCustomerModel>();
+            List<InvoiceSupplierModel> supplierInvoices = new List<InvoiceSupplierModel>();
             using (ManagerIORepository repo = RepositoryHelper.Instance.GetRepository())
             {
                 try
                 {
-                    var sql = PetaPoco.Sql.Builder.Select("cus.CustomerID, cus.CustomerKey, cus.CustomerName, cus.Code,inv.InvoiceID,inv.InvoiceKey, inv.InvoiceBillNo, inv.IssueDate,inv.InvoiceSummary, inv.IsRounding, inv.RoundingMethod,inv.IsDiscount, inv.DiscountType, inv.IsAmountsIncludeTax, d.DescriptionID, d.Qty, d.Amount, d.TaxCode, d.Discount, d.DiscountType,d.Sequence,d.EntityID, inv.PurchaseOrderNo as OrderNo")
-                           .From("Customers cus")
-                           .InnerJoin("Invoice inv").On("cus.CustomerKey = inv.PartyKey")
+                    var sql = PetaPoco.Sql.Builder.Select("sup.SupplierID, sup.SupplierKey, sup.Name,inv.InvoiceID,inv.InvoiceKey, inv.InvoiceBillNo, inv.IssueDate,inv.InvoiceSummary, inv.IsRounding, inv.RoundingMethod,inv.IsDiscount, inv.DiscountType, inv.IsAmountsIncludeTax, d.DescriptionID, d.Qty, d.Amount, d.TaxCode, d.Discount, d.DiscountType,d.Sequence,d.EntityID")
+                           .From("Suppliers sup")
+                           .InnerJoin("Invoice inv").On("sup.SupplierKey = inv.PartyKey")
                            .InnerJoin("Description d").On("inv.InvoiceID = d.EntityID")
-                           .Where("cus.BusinessID = @0 and cus.IsActive = 1 and inv.IsActive = 1 and inv.BusinessID = @0 and inv.InvoiceType = @1 and d.EntityTypeID = 1 and d.IsActive = 1", businessID, (int)ObjectEnum.SalesInvoice);
-                    customerInvoices = repo.Fetch<InvoiceCustomerModel>(sql);
+                           .Where("sup.BusinessID = @0 and sup.IsActive = 1 and inv.IsActive = 1 and inv.BusinessID = @0 and inv.InvoiceType = @1 and d.EntityTypeID = 1 and d.IsActive = 1", businessID, (int)ObjectEnum.PurchaseInvoice);
+                    supplierInvoices = repo.Fetch<InvoiceSupplierModel>(sql);
                 }
                 catch (Exception ex)
                 {
                     throw (ex);
                 }
             }
-            return customerInvoices;
+            return supplierInvoices;
         }
 
-        public List<TransectionCustomerModel> getCustomerTransections(decimal businessID)
+        public List<TransectionSupplierModel> getSupplierTransections(decimal businessID)
         {
-            List<TransectionCustomerModel> customerTransections = new List<TransectionCustomerModel>();
+            List<TransectionSupplierModel> supplierTransections = new List<TransectionSupplierModel>();
             using (ManagerIORepository repo = RepositoryHelper.Instance.GetRepository())
             {
                 try
                 {
-                    var sql = PetaPoco.Sql.Builder.Select("d.Description, d.Qty, d.Amount, d.Account,d.Discount, d.DiscountType, r.ReceiptPaymentID, d.InvoiceKey,r.ReceiptPaymentDate, r.AccountKey as BankAccount, r.Name as ReceiptPaymentName, r.Payee,r.TransectionType, r.Reference, c.CustomerID")
+                    var sql = PetaPoco.Sql.Builder.Select("d.Description, d.Qty, d.Amount, d.Account,d.Discount, d.DiscountType, r.ReceiptPaymentID, d.InvoiceKey,r.ReceiptPaymentDate, r.AccountKey as BankAccount, r.Name as ReceiptPaymentName, r.Payee,r.TransectionType, r.Reference, s.SupplierID")
                            .From("Description d")
                            .InnerJoin("ReceiptsPayments r").On("d.EntityID = r.ReceiptPaymentID")
-                           .InnerJoin("Customers c").On("d.Account = c.CustomerKey")
-                           .Where("d.IsActive = 1 and r.BusinessID = @0 and r.IsActive = 1 and c.BusinessID = @0 and c.IsActive = 1", businessID);
-                    customerTransections = repo.Fetch<TransectionCustomerModel>(sql);
+                           .InnerJoin("Suppliers s").On("d.Account = s.SupplierKey")
+                           .Where("d.IsActive = 1 and r.BusinessID = @0 and r.IsActive = 1 and s.BusinessID = @0 and s.IsActive = 1", businessID);
+                    supplierTransections = repo.Fetch<TransectionSupplierModel>(sql);
                 }
                 catch (Exception ex)
                 {
                     throw (ex);
                 }
             }
-            return customerTransections;
+            return supplierTransections;
         }
 
         public List<TaxCodeModel> getTaxCodes(decimal businessID)
@@ -92,24 +91,24 @@ namespace ManagerIO.DataServices.Services
             return TaxCodes;
         }
 
-        public List<Customer> getAllCustomers(decimal businessID)
+        public List<Supplier> getAllSuppliers(decimal businessID)
         {
-            List<Customer> customers = new List<Customer>();
+            List<Supplier> supplier = new List<Supplier>();
             using (ManagerIORepository repo = RepositoryHelper.Instance.GetRepository())
             {
                 try
                 {
-                    var sql = PetaPoco.Sql.Builder.Select("c.*")
-                           .From("Customers c")
-                           .Where("c.BusinessID = @0 and c.IsActive = 1", businessID);
-                    customers = repo.Fetch<Customer>(sql);
+                    var sql = PetaPoco.Sql.Builder.Select("s.*")
+                           .From("Suppliers s")
+                           .Where(" s.BusinessID = @91 and s.IsActive = 1", businessID);
+                    supplier = repo.Fetch<Supplier>(sql);
                 }
                 catch (Exception ex)
                 {
                     throw (ex);
                 }
             }
-            return customers;
+            return supplier;
         }
 
         public List<Attachment> getAttachmentsByBusiness(decimal businessID)
